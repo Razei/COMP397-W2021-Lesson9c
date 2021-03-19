@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ControlPanelController : MonoBehaviour
 {
@@ -15,9 +15,16 @@ public class ControlPanelController : MonoBehaviour
     public float timer = 0.0f;
     public bool isOnScreen = false;
 
+    [Header("Player Settings")]
     public CameraController playerCamera;
+    public PlayerBehaviour player;
 
     public Pauseable pausable;
+
+    [Header("Scene Data")]
+    public SceneDataScriptableObject sceneData;
+
+    public GameObject gameStateLabel; 
 
     // Start is called before the first frame update
     void Start()
@@ -25,6 +32,7 @@ public class ControlPanelController : MonoBehaviour
         pausable = FindObjectOfType<Pauseable>();
         playerCamera = FindObjectOfType<CameraController>();
         rectTransform = GetComponent<RectTransform>();
+        player = FindObjectOfType<PlayerBehaviour>();
         rectTransform.anchoredPosition = offScreenPosition;
         timer = 0.0f;
     }
@@ -40,11 +48,15 @@ public class ControlPanelController : MonoBehaviour
         if (isOnScreen)
         {
             MoveControlPanelDown();
+
         }
         else
         {
             MoveControlPanelUp();
+
         }
+
+        gameStateLabel.SetActive(pausable.isGamePaused);
     }
 
     void ToggleControlPanel()
@@ -91,5 +103,22 @@ public class ControlPanelController : MonoBehaviour
     public void OnControlButtonPressed()
     {
         ToggleControlPanel();
+    }
+
+    public void OnLoadButtonPressed()
+    {
+        player.controller.enabled = false;
+        player.transform.position = sceneData.playerPosition;
+        player.controller.enabled = true;
+
+        int health = sceneData.playerHealth;
+        player.health = health;
+        player.healthBar.SetHealth(health);
+    }
+
+    public void OnSaveButtonPressed()
+    {
+        sceneData.playerPosition = player.transform.position;
+        sceneData.playerHealth = player.health;
     }
 }
